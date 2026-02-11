@@ -1,0 +1,71 @@
+# Lab_Test_1.S
+# ----------------------------------------------------------------
+# Problem number                : 106
+# Student first name            : Roy
+# Student last name             : Luo
+# Student ID number (8 digits)   : 21055857
+# ------------------------------------------------------------------
+
+.align 2
+.globl _start
+
+_start:
+# --------------------- Strat your code here-------------------------
+    # 1. Initialize Base Address and Matrix A (Last Digit 4 Example)
+    # Base address for DTIM memory is 0x80000000 [4]
+    li s0, 0x80000000         
+
+    # Load Matrix A elements: a=0x6D3, b=0x8E4, c=0x12F, d=0x4B7
+    li t0, 0x6D3              # a_A
+    li t1, 0x8E4              # b_A
+    li t2, 0x12F              # c_A
+    li t3, 0x4B7              # d_A
+
+    # Store Matrix A in memory (row-major: 0x80000000 to 0x8000000C) [4]
+    sw t0, 0(s0)              # store a_A at 0x80000000
+    sw t1, 4(s0)              # store b_A at 0x80000004
+    sw t2, 8(s0)              # store c_A at 0x80000008
+    sw t3, 12(s0)             # store d_A at 0x8000000C
+
+    # 2. Initialize Matrix B (Last Digit 4 Example)
+    # Load Matrix B elements: a=0x2FA, b=0x19B, c=0x5D6, d=0x0C3
+    li t4, 0x2FA              # a_B
+    li t5, 0x19B              # b_B
+    li t6, 0x5D6              # c_B
+    li a0, 0x0C3              # d_B
+
+    # Store Matrix B in memory (row-major: 0x80000010 to 0x8000001C)
+    sw t4, 16(s0)             # store a_B at 0x80000010
+    sw t5, 20(s0)             # store b_B at 0x80000014
+    sw t6, 24(s0)             # store c_B at 0x80000018
+    sw a0, 28(s0)             # store d_B at 0x8000001C
+
+    # 3. Compute Matrix C = A x B
+    # Strategy: C_ij = Sum of (Row_i of A * Col_j of B)
+    
+    # Calculate a_C = (a_A * a_B) + (b_A * c_B)
+    mul a1, t0, t4            # a1 = a_A * a_B [5]
+    mul a2, t1, t6            # a2 = b_A * c_B
+    add s1, a1, a2            # s1 = sum [6]
+    sw  s1, 32(s0)            # Store result at 0x80000020
+
+    # Calculate b_C = (a_A * b_B) + (b_A * d_B)
+    mul a1, t0, t5            # a1 = a_A * b_B
+    mul a2, t1, a0            # a2 = b_A * d_B
+    add s2, a1, a2            # s2 = sum
+    sw  s2, 36(s0)            # Store result at 0x80000024
+
+    # Calculate c_C = (c_A * a_B) + (d_A * c_B)
+    mul a1, t2, t4            # a1 = c_A * a_B
+    mul a2, t3, t6            # a2 = d_A * c_B
+    add s3, a1, a2            # s3 = sum
+    sw  s3, 40(s0)            # Store result at 0x80000028
+
+    # Calculate d_C = (c_A * b_B) + (d_A * d_B)
+    mul a1, t2, t5            # a1 = c_A * b_B
+    mul a2, t3, a0            # a2 = d_A * d_B
+    add s4, a1, a2            # s4 = sum
+    sw  s4, 44(s0)            # Store result at 0x8000002C
+
+    # 4. End Program
+    ebreak                    # Transfer control to debugger [5, 7]
